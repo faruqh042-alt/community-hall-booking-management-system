@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Hall Booking Management System</title>
+<meta name="description" content="Browse community halls, check live availability and book your event in minutes.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Loading screen: a soft rotating ring -->
+  <div id="pageLoader" role="status" aria-label="Loading">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Loading</div>
+  </div>
+
+  <div id="navbar" class="navbar"></div>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="main">
+    <canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+    <!-- gentle gradient blobs + floating pastel shapes -->
+    <div class="hero-bg" aria-hidden="true">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+      <div class="shape circle h1"></div>
+      <div class="shape ring h2"></div>
+      <div class="shape circle h3"></div>
+      <div class="shape plus h4"></div>
+      <div class="shape circle h5"></div>
+    </div>
+
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow">Live availability · Instant requests</span>
+        <h1 class="hero-title">Find &amp; Book the <span class="gradient-text">Perfect Community Hall</span></h1>
+        <p class="hero-subtitle" id="typedSubtitle" data-text="Browse halls, check availability, and book your event in minutes."></p>
+        <div class="hero-actions">
+          <a href="halls.html" class="btn btn-lg btn-gradient">Book a Hall</a>
+          <a href="#featured" class="btn btn-lg btn-ghost">Explore Halls</a>
+        </div>
+        <p class="hero-note">📞 Questions? Call the owner: <a href="tel:+919353916328"><strong>+91 93539 16328</strong></a></p>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-frame" data-depth="12">
+          <img src="images/hero-hall.svg" alt="Illustration of a bright community hall decorated with bunting and balloons" width="640" height="520">
+        </div>
+        <div class="float-card fc-1" data-depth="26"><span class="ico">✅</span> Instant booking requests</div>
+        <div class="float-card fc-2" data-depth="20"><span class="ico">📅</span> Live availability</div>
+        <div class="float-card fc-3" data-depth="32"><span class="ico">📧</span> Owner email alerts</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scrolling ribbon (the track is duplicated so the loop is seamless) -->
+  <div class="marquee" aria-hidden="true"><div class="marquee-track"><span>✦ Live Availability</span><span>✦ Instant Booking</span><span>✦ Owner Approval</span><span>✦ Email Alerts</span><span>✦ Calendar Picker</span><span>✦ Secure Login</span><span>✦ Premium Halls</span><span>✦ Easy Management</span><span>✦ Live Availability</span><span>✦ Instant Booking</span><span>✦ Owner Approval</span><span>✦ Email Alerts</span><span>✦ Calendar Picker</span><span>✦ Secure Login</span><span>✦ Premium Halls</span><span>✦ Easy Management</span></div></div>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="section section-alt">
+    <div class="container">
+      <h2 class="reveal">How It Works</h2>
+      <div class="grid">
+        <div class="card tilt reveal">
+          <div class="card-body">
+            <span class="feature-icon">🔎</span>
+            <h3>1. Browse Halls</h3>
+            <p class="text-muted">Explore halls by location, capacity, and price to find the right fit for your event.</p>
+          </div>
+        </div>
+        <div class="card tilt reveal">
+          <div class="card-body">
+            <span class="feature-icon">🗓️</span>
+            <h3>2. Check Availability</h3>
+            <p class="text-muted">Pick a date and see which time slots are still free before you book.</p>
+          </div>
+        </div>
+        <div class="card tilt reveal">
+          <div class="card-body">
+            <span class="feature-icon">🎉</span>
+            <h3>3. Book &amp; Track</h3>
+            <p class="text-muted">Submit a booking request and track its approval status from your dashboard.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="section">
+    <div class="container">
+      <h2 class="reveal">Everything You Need</h2>
+      <div class="grid">
+        <div class="card tilt reveal"><div class="card-body"><span class="feature-icon">📅</span><h3>Calendar Booking</h3><p class="text-muted">Pick your date from a clean calendar and see free slots instantly.</p></div></div>
+        <div class="card tilt reveal"><div class="card-body"><span class="feature-icon">🔒</span><h3>No Double Booking</h3><p class="text-muted">Taken slots are locked, so two people can never get the same hall.</p></div></div>
+        <div class="card tilt reveal"><div class="card-body"><span class="feature-icon">📧</span><h3>Owner Email Alerts</h3><p class="text-muted">The owner gets an email the moment a booking request arrives.</p></div></div>
+        <div class="card tilt reveal"><div class="card-body"><span class="feature-icon">✅</span><h3>Approve or Reject</h3><p class="text-muted">Admins manage every booking from one dashboard.</p></div></div>
+        <div class="card tilt reveal"><div class="card-body"><span class="feature-icon">📱</span><h3>Works on Mobile</h3><p class="text-muted">Fully responsive, with lighter animations on phones.</p></div></div>
+        <div class="card tilt reveal"><div class="card-body"><span class="feature-icon">📞</span><h3>Talk to the Owner</h3><p class="text-muted">Call or WhatsApp +91 93539 16328 any time.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURED HALLS (real data from the database) ============ -->
+  <section class="section section-lav" id="featured">
+    <div class="container">
+      <div class="flex-between">
+        <h2 class="reveal">Featured Halls</h2>
+        <a href="halls.html" class="btn btn-sm btn-outline">View all halls &rarr;</a>
+      </div>
+      <div id="featuredHalls" class="grid mt-24">
+        <p class="text-muted">Loading halls...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CALL TO ACTION ============ -->
+  <section class="section" style="padding-top:24px;">
+    <div class="container">
+      <div class="cta-band reveal">
+        <h2>Ready to host your next event?</h2>
+        <p>Choose a hall, pick a date and send your request in under a minute.</p>
+        <a href="halls.html" class="btn btn-lg">Book a Hall</a>
+        <a href="register.html" class="btn btn-lg btn-ghost">Create an account</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <strong style="color:var(--ink);font-size:1.05rem;">Community Hall Booking Management System</strong>
+        <p>Browse community halls, check live availability and book your event with a few clicks.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul><li><a href="index.html">Home</a></li><li><a href="halls.html">Browse Halls</a></li><li><a href="booking-history.html">My Bookings</a></li></ul>
+      </div>
+      <div>
+        <h4>Account</h4>
+        <ul><li><a href="login.html">Login</a></li><li><a href="register.html">Sign Up</a></li></ul>
+      </div>
+      <div>
+        <h4>Contact the owner</h4>
+        <ul>
+          <li><a href="tel:+919353916328">📞 +91 93539 16328</a></li>
+          <li><a href="https://wa.me/919353916328" target="_blank" rel="noopener">💬 WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Community Hall Booking Management System. Built for learning purposes.</div>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

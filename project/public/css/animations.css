@@ -1,0 +1,184 @@
+/* ==========================================================================
+   animations.css — motion layer for the BRIGHT theme
+   --------------------------------------------------------------------------
+   Everything here animates only `transform` / `translate` / `opacity`
+   (GPU friendly) so it stays smooth at 60fps. Colours come from theme.css.
+   Heavy effects are reduced on phones and switched off for users who ask
+   their system for reduced motion (bottom of the file).
+
+   Contents
+     1. Floating pastel shapes + gradient blobs (every page, behind content)
+     2. Hero blobs and shapes
+     3. Floating cards (uses the separate `translate` property, so it never
+        fights the 3D tilt, which uses `transform`)
+     4. Scroll progress bar
+     5. Marquee ribbon
+     6. Card spotlight + shine sweep
+     7. Click sparkle burst
+     8. Heading underline, nav / table / badge touches
+     9. Feature icons
+    10. Mobile + reduced motion
+   ========================================================================== */
+
+/* ---------------- 1. GLOBAL BACKGROUND SHAPES -------------------------- */
+.bg-shapes {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+}
+.bg-shapes .blob {
+  position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.55; will-change: transform;
+}
+.bg-shapes .blob:nth-child(1) { width: 38vmax; height: 38vmax; background: #BFE3FF; top: -14vmax; left: -10vmax; animation: blobA 24s ease-in-out infinite alternate; }
+.bg-shapes .blob:nth-child(2) { width: 34vmax; height: 34vmax; background: #E9D5FF; bottom: -14vmax; right: -8vmax; animation: blobB 28s ease-in-out infinite alternate; }
+.bg-shapes .blob:nth-child(3) { width: 24vmax; height: 24vmax; background: #FFE2D2; top: 40%; left: 55%; opacity: 0.4; animation: blobC 32s ease-in-out infinite alternate; }
+
+.shape { position: absolute; will-change: transform; opacity: 0.8; }
+.shape.circle { border-radius: 50%; }
+.shape.ring { border-radius: 50%; border: 4px solid; background: transparent; }
+.shape.square { border-radius: 10px; }
+.shape.plus::before, .shape.plus::after { content: ''; position: absolute; background: currentColor; border-radius: 3px; }
+.shape.plus::before { left: 0; right: 0; top: 50%; height: 6px; transform: translateY(-50%); }
+.shape.plus::after  { top: 0; bottom: 0; left: 50%; width: 6px; transform: translateX(-50%); }
+
+/* Each shape gets its own size / colour / speed so they never move in sync */
+.s1 { width: 26px; height: 26px; background: var(--coral); top: 18%; left: 6%;  animation: floatShape 9s ease-in-out infinite; }
+.shape.ring.s2 { width: 40px; height: 40px; border-color: var(--violet); top: 62%; left: 10%; animation: floatShape 12s ease-in-out -3s infinite; }
+.s3 { width: 18px; height: 18px; background: var(--sky); top: 30%; right: 8%;  animation: floatShape 8s ease-in-out -2s infinite; }
+.s4 { width: 22px; height: 22px; background: #FBCFA8; top: 74%; right: 14%; animation: floatShape 11s ease-in-out -5s infinite; transform: rotate(20deg); }
+.s5 { width: 24px; height: 24px; color: var(--blue); top: 12%; right: 30%; animation: spinFloat 16s linear infinite; }
+.s6 { width: 20px; height: 20px; background: #A7F3D0; top: 86%; left: 40%; animation: floatShape 10s ease-in-out -1s infinite; }
+
+@keyframes floatShape {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(14px, -26px) rotate(14deg); }
+}
+@keyframes spinFloat {
+  from { transform: translateY(0) rotate(0deg); }
+  50%  { transform: translateY(-18px) rotate(180deg); }
+  to   { transform: translateY(0) rotate(360deg); }
+}
+@keyframes blobA { to { transform: translate(18vw, 14vh) scale(1.15); } }
+@keyframes blobB { to { transform: translate(-16vw, -12vh) scale(1.1); } }
+@keyframes blobC { to { transform: translate(-14vw, 10vh) scale(0.85); } }
+
+/* ---------------- 2. HERO BLOBS + SHAPES ------------------------------- */
+.hero-bg { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.hero-bg .blob { position: absolute; border-radius: 50%; filter: blur(60px); will-change: transform; }
+.hero-bg .b1 { width: 460px; height: 460px; background: rgba(56, 189, 248, 0.35); top: -120px; left: -100px; animation: blobA 18s ease-in-out infinite alternate; }
+.hero-bg .b2 { width: 420px; height: 420px; background: rgba(139, 92, 246, 0.28); bottom: -140px; right: -80px; animation: blobB 22s ease-in-out infinite alternate; }
+.hero-bg .b3 { width: 300px; height: 300px; background: rgba(255, 107, 107, 0.2); top: 30%; left: 42%; animation: blobC 26s ease-in-out infinite alternate; }
+.hero-bg .shape { opacity: 0.9; }
+.hero-bg .h1 { width: 30px; height: 30px; background: var(--coral); top: 14%; left: 46%; animation: floatShape 8s ease-in-out infinite; }
+.hero-bg .h2 { width: 56px; height: 56px; border-color: rgba(37, 99, 235, 0.55); bottom: 14%; left: 4%; animation: floatShape 13s ease-in-out -4s infinite; }
+.hero-bg .h3 { width: 22px; height: 22px; background: var(--violet); bottom: 22%; left: 48%; animation: floatShape 10s ease-in-out -2s infinite; }
+.hero-bg .h4 { width: 26px; height: 26px; color: var(--sky); top: 20%; right: 6%; animation: spinFloat 18s linear infinite; }
+.hero-bg .h5 { width: 18px; height: 18px; background: #A7F3D0; top: 8%; left: 8%; animation: floatShape 9s ease-in-out -6s infinite; }
+
+/* Little cards that bob around the hero picture (the entrance is in theme.css) */
+.float-card { animation: bob 6s ease-in-out infinite; }
+.float-card.fc-2 { animation-duration: 7s; animation-delay: -2s; }
+.float-card.fc-3 { animation-duration: 8s; animation-delay: -4s; }
+/* uses `transform`, leaving `translate` free for the mouse parallax in effects.js */
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+/* ---------------- 3. FLOATING CARDS ------------------------------------ */
+.card { position: relative; animation: floatCard 7s ease-in-out infinite; }
+.grid .card:nth-child(2n) { animation-delay: -1.6s; animation-duration: 8s; }
+.grid .card:nth-child(3n) { animation-delay: -3.2s; animation-duration: 9s; }
+.card:hover { animation-play-state: paused; }
+/* `translate` is separate from `transform`, so this composes with the tilt */
+@keyframes floatCard { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
+
+/* ---------------- 4. SCROLL PROGRESS BAR ------------------------------- */
+#scrollProgress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 100%;
+  transform-origin: left; transform: scaleX(0);
+  background: linear-gradient(90deg, var(--blue), var(--violet), var(--coral));
+  z-index: 100000;
+}
+
+/* ---------------- 5. MARQUEE RIBBON ------------------------------------ */
+.marquee {
+  overflow: hidden; background: var(--white);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 14px 0; white-space: nowrap;
+}
+.marquee-track { display: inline-flex; gap: 48px; padding-left: 48px; animation: marqueeMove 32s linear infinite; will-change: transform; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee-track span { letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem; font-weight: 700; color: var(--blue); }
+.marquee-track span:nth-child(3n+2) { color: var(--violet); }
+.marquee-track span:nth-child(3n) { color: var(--coral-ink); }
+@keyframes marqueeMove { to { transform: translateX(-50%); } }
+
+/* ---------------- 6. CARD SPOTLIGHT + SHINE ---------------------------- */
+/* Soft blue light that follows the mouse (--mx / --my set by animations.js) */
+.card::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(139, 92, 246, 0.12), transparent 70%);
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.card:hover::before { opacity: 1; }
+.card::after {
+  content: ''; position: absolute; top: 0; left: -80%; width: 50%; height: 100%; z-index: 2; pointer-events: none;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-18deg);
+}
+.card:hover::after { animation: shineSweep 0.9s ease forwards; }
+@keyframes shineSweep { to { left: 140%; } }
+/* The availability badge sits above the shine layer */
+.card .avail-badge { z-index: 4; }
+
+/* ---------------- 7. CLICK SPARKLE BURST ------------------------------- */
+.burst-spark {
+  position: fixed; top: 0; left: 0; width: 8px; height: 8px; margin: -4px 0 0 -4px;
+  border-radius: 50%; pointer-events: none; z-index: 99990;
+}
+
+/* ---------------- 8. SMALL TOUCHES ------------------------------------- */
+/* Heading underline draws itself when the heading scrolls into view */
+.section h2 { position: relative; }
+.section h2::after {
+  content: ''; position: absolute; left: 0; bottom: -6px; height: 4px; width: 56%;
+  border-radius: 4px; background: linear-gradient(90deg, var(--blue), var(--violet), transparent);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.9s cubic-bezier(.2, .8, .2, 1) 0.3s;
+}
+.section h2.in-view::after, .section h2:not(.reveal)::after { transform: scaleX(1); }
+.cta-band h2::after { display: none; }
+
+tbody tr { animation: rowIn 0.5s ease both; }
+tbody tr:nth-child(2) { animation-delay: 0.05s; }
+tbody tr:nth-child(3) { animation-delay: 0.1s; }
+tbody tr:nth-child(4) { animation-delay: 0.15s; }
+tbody tr:nth-child(5) { animation-delay: 0.2s; }
+tbody tr:nth-child(n+6) { animation-delay: 0.25s; }
+@keyframes rowIn { from { opacity: 0; transform: translateX(-14px); } }
+
+.badge-pending { animation: badgePulse 2.4s ease-in-out infinite; }
+@keyframes badgePulse { 50% { box-shadow: 0 0 0 5px rgba(251, 146, 60, 0.18); } }
+.slot.selected { animation: slotPop 0.35s ease; }
+@keyframes slotPop { 50% { transform: scale(1.06); } }
+
+/* ---------------- 9. FEATURE ICONS ------------------------------------- */
+.feature-icon {
+  width: 54px; height: 54px; border-radius: 16px; display: inline-grid; place-items: center;
+  font-size: 1.6rem; background: var(--blue-50); animation: iconBob 3.4s ease-in-out infinite;
+}
+.grid .card:nth-child(4n+2) .feature-icon { background: var(--lavender); animation-delay: -0.8s; }
+.grid .card:nth-child(4n+3) .feature-icon { background: var(--peach); animation-delay: -1.6s; }
+.grid .card:nth-child(4n) .feature-icon { background: var(--mint); animation-delay: -2.4s; }
+@keyframes iconBob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+
+/* ---------------- 10. MOBILE + REDUCED MOTION -------------------------- */
+@media (max-width: 768px) {
+  .bg-shapes .blob { filter: blur(50px); opacity: 0.4; }
+  .bg-shapes .shape:nth-of-type(n+5) { display: none; }
+  .hero-bg .b3, .hero-bg .h3, .hero-bg .h5 { display: none; }
+  .card { animation: none; }        /* no floating on phones: saves battery */
+  .card::after { display: none; }   /* no shine sweep on touch */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-shapes, .hero-bg .shape, .marquee-track { animation: none !important; }
+  .bg-shapes .blob, .hero-bg .blob, .shape, .card, .float-card, .feature-icon { animation: none !important; }
+  #scrollProgress { display: none; }
+}

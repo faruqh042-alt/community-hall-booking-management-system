@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Halls - Community Hall Booking Management System</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Loading screen: a soft rotating ring -->
+  <div id="pageLoader" role="status" aria-label="Loading">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Loading</div>
+  </div>
+
+<div id="navbar" class="navbar"></div>
+
+  <section class="section" id="main">
+    <div class="container">
+      <h2 class="reveal">All Community Halls</h2>
+
+      <div class="form-group" style="max-width:320px;">
+        <label for="searchInput">Search by name or location</label>
+        <input type="text" id="searchInput" placeholder="e.g. Bengaluru, Sunrise...">
+      </div>
+
+      <div id="hallsGrid" class="grid mt-24">
+        <p class="text-muted">Loading halls...</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <strong style="color:var(--ink);font-size:1.05rem;">Community Hall Booking Management System</strong>
+        <p>Browse community halls, check live availability and book your event with a few clicks.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul><li><a href="index.html">Home</a></li><li><a href="halls.html">Browse Halls</a></li><li><a href="booking-history.html">My Bookings</a></li></ul>
+      </div>
+      <div>
+        <h4>Account</h4>
+        <ul><li><a href="login.html">Login</a></li><li><a href="register.html">Sign Up</a></li></ul>
+      </div>
+      <div>
+        <h4>Contact the owner</h4>
+        <ul>
+          <li><a href="tel:+919353916328">📞 +91 93539 16328</a></li>
+          <li><a href="https://wa.me/919353916328" target="_blank" rel="noopener">💬 WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Community Hall Booking Management System. Built for learning purposes.</div>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/halls.js"></script>
+</body>
+</html>

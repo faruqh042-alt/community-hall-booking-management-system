@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up - Community Hall Booking Management System</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="auth-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Loading screen: a soft rotating ring -->
+  <div id="pageLoader" role="status" aria-label="Loading">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Loading</div>
+  </div>
+
+<div id="navbar" class="navbar"></div>
+
+  <div class="form-wrap" id="main">
+    <h2>Create an Account</h2>
+    <div id="registerAlert"></div>
+
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" minlength="6" required>
+        <small class="text-muted">At least 6 characters.</small>
+      </div>
+      <button type="submit" class="btn" style="width:100%;" id="registerBtn">Sign Up</button>
+    </form>
+
+    <p class="form-footer-note">Already have an account? <a href="login.html">Login</a></p>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <strong style="color:var(--ink);font-size:1.05rem;">Community Hall Booking Management System</strong>
+        <p>Browse community halls, check live availability and book your event with a few clicks.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul><li><a href="index.html">Home</a></li><li><a href="halls.html">Browse Halls</a></li><li><a href="booking-history.html">My Bookings</a></li></ul>
+      </div>
+      <div>
+        <h4>Account</h4>
+        <ul><li><a href="login.html">Login</a></li><li><a href="register.html">Sign Up</a></li></ul>
+      </div>
+      <div>
+        <h4>Contact the owner</h4>
+        <ul>
+          <li><a href="tel:+919353916328">📞 +91 93539 16328</a></li>
+          <li><a href="https://wa.me/919353916328" target="_blank" rel="noopener">💬 WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Community Hall Booking Management System. Built for learning purposes.</div>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>

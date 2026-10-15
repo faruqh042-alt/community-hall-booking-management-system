@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - Community Hall Booking Management System</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="dash-page">
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div id="pageLoader" role="status" aria-label="Loading">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Loading</div>
+  </div>
+
+  <div id="navbar" class="navbar"></div>
+
+  <div class="container dash" id="main">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="dash-sidebar" aria-label="Dashboard sections">
+      <div class="dash-side-title">Admin</div>
+      <button class="tab-btn side-link active" data-tab="overviewTab" type="button">📊 Overview</button>
+      <button class="tab-btn side-link" data-tab="hallsTab" type="button">🏛️ Manage Halls</button>
+      <button class="tab-btn side-link" data-tab="bookingsTab" type="button">📅 Manage Bookings</button>
+    </aside>
+
+    <div class="dash-main">
+
+      <!-- ============ OVERVIEW TAB (live statistics) ============ -->
+      <div id="overviewTab" class="tab-content active">
+        <h2>Admin Dashboard</h2>
+        <p class="lead">A live summary of your halls and booking requests.</p>
+
+        <div class="stat-grid">
+          <div class="stat-card s-blue"><div class="stat-icon">🏛️</div><div class="stat-num" id="statHalls">0</div><div class="stat-label">Total halls</div></div>
+          <div class="stat-card s-violet"><div class="stat-icon">📒</div><div class="stat-num" id="statBookings">0</div><div class="stat-label">Total bookings</div></div>
+          <div class="stat-card s-peach"><div class="stat-icon">⏳</div><div class="stat-num" id="statPending">0</div><div class="stat-label">Pending approval</div></div>
+          <div class="stat-card s-mint"><div class="stat-icon">✅</div><div class="stat-num" id="statApproved">0</div><div class="stat-label">Approved</div></div>
+          <div class="stat-card s-coral"><div class="stat-icon">🚫</div><div class="stat-num" id="statRejected">0</div><div class="stat-label">Rejected</div></div>
+        </div>
+
+        <div class="panel-title"><h3>Latest bookings</h3></div>
+        <div id="recentBookings"><p class="text-muted">Loading bookings...</p></div>
+      </div>
+
+      <!-- ============ HALLS TAB ============ -->
+      <div id="hallsTab" class="tab-content">
+        <div class="panel-title">
+          <h2 style="margin:0;">Halls</h2>
+          <button class="btn" id="addHallBtn" type="button">+ Add New Hall</button>
+        </div>
+
+        <!-- Add/Edit Hall Form (hidden until needed) -->
+        <div id="hallFormWrap" class="form-wrap hidden">
+          <h3 id="hallFormTitle">Add New Hall</h3>
+          <div id="hallFormAlert" role="status" aria-live="polite"></div>
+          <form id="hallForm">
+            <input type="hidden" id="hallId">
+            <div class="form-group">
+              <label for="hallName">Hall Name</label>
+              <input type="text" id="hallName" required>
+            </div>
+            <div class="form-group">
+              <label for="hallLocation">Location</label>
+              <input type="text" id="hallLocation" required>
+            </div>
+            <div class="form-group">
+              <label for="hallPrice">Price (₹ per booking)</label>
+              <input type="number" id="hallPrice" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="hallCapacity">Capacity (guests)</label>
+              <input type="number" id="hallCapacity" min="1" required>
+            </div>
+            <div class="form-group">
+              <label for="hallImage">Image URL (optional)</label>
+              <input type="text" id="hallImage" placeholder="images/hall1.jpg">
+            </div>
+            <div class="form-group">
+              <label for="hallDescription">Description</label>
+              <textarea id="hallDescription" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn" id="hallFormSubmitBtn">Save Hall</button>
+            <button type="button" class="btn btn-outline" id="cancelHallFormBtn">Cancel</button>
+          </form>
+        </div>
+
+        <div id="adminHallsList" class="mt-24">
+          <p class="text-muted">Loading halls...</p>
+        </div>
+      </div>
+
+      <!-- ============ BOOKINGS TAB ============ -->
+      <div id="bookingsTab" class="tab-content">
+        <div class="panel-title"><h2 style="margin:0;">All Bookings</h2></div>
+        <div id="adminBookingsList" class="mt-24">
+          <p class="text-muted">Loading bookings...</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <strong style="color:var(--ink);font-size:1.05rem;">Community Hall Booking Management System</strong>
+        <p>Browse community halls, check live availability and book your event with a few clicks.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul><li><a href="index.html">Home</a></li><li><a href="halls.html">Browse Halls</a></li><li><a href="booking-history.html">My Bookings</a></li></ul>
+      </div>
+      <div>
+        <h4>Account</h4>
+        <ul><li><a href="login.html">Login</a></li><li><a href="register.html">Sign Up</a></li></ul>
+      </div>
+      <div>
+        <h4>Contact the owner</h4>
+        <ul>
+          <li><a href="tel:+919353916328">📞 +91 93539 16328</a></li>
+          <li><a href="https://wa.me/919353916328" target="_blank" rel="noopener">💬 WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Community Hall Booking Management System. Built for learning purposes.</div>
+  </footer>
+
+  <script src="js/auth.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
