@@ -8,6 +8,7 @@ const path = require('path');
 require('dotenv').config();
 
 const { testConnection } = require('./db');
+const { migrate } = require('./scripts/migrate');
 
 // Route files
 const authRoutes = require('./routes/authRoutes');
@@ -20,7 +21,30 @@ const managerRoutes = require('./routes/managerRoutes');
 const app = express();
 
 // ---------------- MIDDLEWARE ----------------
-app.use(cors({ origin: process.env.APP_ORIGIN || false }));
+const configuredOrigins = [process.env.APP_ORIGIN, process.env.CORS_ALLOWED_ORIGINS]
+  .filter(Boolean)
+  .join(',');
+const allowedOrigins = [
+  ...configuredOrigins.split(',').map(origin => origin.trim()).filter(Boolean),
+  'http://localhost:5000',
+  'http://127.0.0.1:5000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500'
+];
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());      // parse incoming JSON request bodies
 app.use((req, res, next) => {
   req.body = req.body || {};
@@ -61,6 +85,13 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
+  try {
+    await migrate();
+    console.log('✅ Database schema checked and updated if needed.');
+  } catch (error) {
+    console.error('❌ Database migration failed:', error.message);
+  }
+
   console.log(`🚀 Server running at http://localhost:${PORT}`);
   await testConnection();
 });

@@ -19,7 +19,7 @@ async function indexExists(connection, table, index) {
   return rows.length > 0;
 }
 
-async function migrate() {
+async function migrate({ closePool = false } = {}) {
   const connection = await pool.getConnection();
   try {
     await connection.query(`
@@ -115,14 +115,21 @@ async function migrate() {
     } else {
       console.log('Migration 002_audit_events is already applied.');
     }
+    return true;
   } finally {
     connection.release();
-    await pool.end();
+    if (closePool) {
+      await pool.end();
+    }
   }
 }
 
-migrate().catch(async (err) => {
-  console.error('Database migration failed:', err.message);
-  await pool.end();
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  migrate({ closePool: true }).catch(async (err) => {
+    console.error('Database migration failed:', err.message);
+    await pool.end();
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { migrate, columnExists, indexExists };

@@ -2,10 +2,8 @@
 // Shared helper functions used by every page: talking to the API,
 // storing the login token, and building the navbar.
 
-// Because we serve the frontend from the SAME Express server (see server.js),
-// we can use a relative path. If you ever run the frontend on a different
-// port/server, change this to something like "http://localhost:5000/api".
-const API_BASE = '/api';
+// Use the deployed Render backend for API requests.
+const API_BASE = 'https://community-hall-backend.onrender.com/api';
 
 // ---- Token / user storage (using localStorage) ----
 function saveSession(token, user) {
@@ -39,7 +37,7 @@ function isLoggedIn() {
 // A small wrapper around fetch() that automatically adds the JWT token
 // (if we have one) to the Authorization header, and parses JSON.
 async function apiRequest(path, options = {}) {
-  const headers = options.headers || {};
+  const headers = { ...(options.headers || {}) };
   headers['Content-Type'] = 'application/json';
 
   const token = getToken();
@@ -47,10 +45,18 @@ async function apiRequest(path, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(API_BASE + path, {
-    ...options,
-    headers
-  });
+  let response;
+  try {
+    response = await fetch(API_BASE + path, {
+      ...options,
+      headers
+    });
+  } catch (error) {
+    const message = 'Could not reach the backend. Check the Render backend URL and CORS settings.';
+    const wrapped = new Error(message);
+    wrapped.originalError = error;
+    throw wrapped;
+  }
 
   let data;
   try {
@@ -61,8 +67,7 @@ async function apiRequest(path, options = {}) {
 
   if (response.status === 401 && token) clearSession();
   if (!response.ok) {
-    // Throw so calling code can catch() and show data.message
-    const error = new Error(data.message || 'Something went wrong.');
+    const error = new Error(data.message || data.error || `Request failed with status ${response.status}.`);
     error.status = response.status;
     throw error;
   }
