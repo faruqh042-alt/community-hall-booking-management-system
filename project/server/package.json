@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "db:migrate": "node scripts/migrate.js",
+    "owner:init": "node scripts/initializeOwner.js",
+    "test": "node --test"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

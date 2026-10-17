@@ -237,7 +237,7 @@ function initHeroParticles() {
   if (!canvas || prefersReducedMotion) return;
 
   const ctx = canvas.getContext('2d');
-  const colours = ['37,99,235', '56,189,248', '139,92,246', '255,107,107', '110,231,183'];
+  const colours = ['211,154,8', '245,200,76', '184,120,36', '217,106,67', '255,233,171'];
   const count = window.matchMedia('(max-width: 768px)').matches ? 16 : 34;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   let w = 0, h = 0, particles = [], rafId = null, visible = true;

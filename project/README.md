@@ -111,7 +111,8 @@ Inside `/server`, copy the example env file:
 cp .env.example .env
 ```
 
-Open `.env` and fill in your real MySQL password and a JWT secret:
+Open `.env` and fill in your real MySQL password and a strong, unique JWT
+secret (generate one with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`):
 
 ```
 DB_HOST=localhost
@@ -120,9 +121,13 @@ DB_PASSWORD=your_mysql_password
 DB_NAME=community_hall_db
 DB_PORT=3306
 PORT=5000
-JWT_SECRET=this_is_a_super_secret_key_change_me
+JWT_SECRET=
 JWT_EXPIRES_IN=1d
 ```
+
+For verified owner setup, configure SMTP credentials in the server environment
+as well (`EMAIL_USER`, `EMAIL_PASS`, and, if needed, `EMAIL_HOST`, `EMAIL_PORT`,
+and `EMAIL_SECURE`). Never commit `.env`.
 
 ### 4. Install backend dependencies
 
@@ -134,7 +139,37 @@ npm install
 This installs: express, mysql2, bcrypt, jsonwebtoken, cors, dotenv (and
 nodemon for development).
 
-### 5. Run the backend
+### 5. Apply the additive database migration
+
+From the `server` directory, run:
+
+```bash
+npm run db:migrate
+```
+
+This migration preserves existing accounts, halls, and bookings. It adds the
+owner/manager roles, account activation and verification fields, hall
+facilities and activation fields, manager-to-hall assignments, cancelled
+booking status, supporting indexes, and the management audit log. It is safe to rerun. Back up the
+database before applying schema changes in production.
+
+### 6. Initialize the owner account
+
+The owner account is restricted to `faruqh042@gmail.com`. Public registration
+cannot create owner or manager accounts. After configuring SMTP, run this
+command from an interactive terminal:
+
+```bash
+npm run owner:init
+```
+
+The script emails a short-lived one-time code to the owner mailbox before
+setting a new owner password. Existing account data is retained; the owner
+password is reset only after mailbox verification. Only one owner account is
+allowed. Managers are created by changing a registered user's role in the
+Owner Dashboard, then assigning that manager one or more active halls.
+
+### 7. Run the backend
 
 ```bash
 npm start
@@ -153,7 +188,7 @@ You should see:
 ✅ MySQL database connected successfully
 ```
 
-### 6. Open the frontend
+### 8. Open the frontend
 
 Just open your browser and go to:
 
@@ -166,11 +201,10 @@ That's it — no separate frontend server needed, since Express serves the
 
 1. Click **Sign Up** to create a normal user account.
 2. Browse halls, view details, pick a date, and book a slot.
-3. To test admin features: create an account, then in MySQL run
-   `UPDATE users SET role='admin' WHERE email='...';`, then log out and log
-   back in (the JWT token needs to be refreshed to pick up the new role).
-4. As an admin, go to **Admin Dashboard** to add/edit/delete halls and to
-   approve/reject bookings.
+3. The owner initializes the verified account with `npm run owner:init` and
+   signs in through the normal Login page. Managers are redirected to Manager
+   Dashboard after the owner assigns them halls.
+4. Existing legacy admin accounts retain access to the Admin Dashboard.
 
 ---
 
@@ -190,6 +224,12 @@ That's it — no separate frontend server needed, since Express serves the
 | DELETE | `/api/admin/halls/:id`         | Admin       | Delete a hall                         |
 | GET    | `/api/admin/bookings`          | Admin       | List every booking                    |
 | PUT    | `/api/admin/bookings/:id`      | Admin       | Approve/reject a booking               |
+| GET    | `/api/me`                      | User        | Return the current database-backed identity |
+| GET    | `/api/owner/dashboard`         | Owner       | Real owner statistics and activity |
+| GET    | `/api/owner/users`             | Owner       | Search and paginate user/manager accounts |
+| GET    | `/api/owner/bookings`          | Owner       | Search and paginate booking history |
+| GET    | `/api/manager/dashboard`       | Manager     | Statistics and activity for assigned halls |
+| GET    | `/api/manager/bookings`        | Manager     | Search and paginate assigned-hall bookings |
 
 **Authentication:** After login, the frontend stores the returned JWT in
 `localStorage` and sends it on every protected request as:
@@ -224,14 +264,19 @@ See `server/seed.sql` for sample halls. Recommended flow for testing:
 
 ---
 
-## 🔒 Security Notes (kept simple for learning, but real practices)
+## 🔒 Security Notes
 
 - Passwords are hashed with **bcrypt** before being stored — never saved as
   plain text.
-- Protected routes use a **JWT verification middleware** (`verifyToken`)
-  and an **admin-only middleware** (`isAdmin`).
+- Protected routes verify JWTs, reload the current account and role from
+  MySQL, and enforce owner, manager, user, and legacy admin permissions.
+- Manager reads and writes are scoped to halls assigned by the owner.
+- Only the owner initialization script can bootstrap the fixed owner account,
+  and it requires mailbox verification.
 - SQL queries use parameterized placeholders (`?`) to prevent SQL injection.
-- CORS is enabled so the API can be called safely from the frontend.
+- Never expose or commit SMTP credentials, database passwords, or JWT secrets.
+- Revenue is reported as unavailable until actual payment/transaction records
+  are added; the dashboard does not invent financial totals.
 
 ---
 
@@ -239,8 +284,9 @@ See `server/seed.sql` for sample halls. Recommended flow for testing:
 
 ## ✨ Bright Theme and Animations
 
-The frontend uses a bright, friendly palette on white. It is pure CSS and
-vanilla JavaScript layered on `style.css`; the backend API is unchanged.
+The frontend uses CSS and vanilla JavaScript layered on `style.css`, with a
+persistent light/dark theme, owner and manager dashboards, and server-side
+role enforcement.
 
 ### Colour palette
 | Role | Colour |
@@ -253,7 +299,8 @@ vanilla JavaScript layered on `style.css`; the backend API is unchanged.
 | Main text / secondary text | `#172554` / `#64748B` |
 | Borders | `#E2E8F0` |
 
-All colours are CSS variables at the top of `public/css/theme.css`.
+Colours are CSS variables in `public/css/theme.css`. The saved theme is
+applied before the stylesheets load.
 
 ### Frontend files
 | File | What it does |
@@ -262,6 +309,9 @@ All colours are CSS variables at the top of `public/css/theme.css`.
 | `public/css/animations.css` | Motion: drifting pastel blobs, floating shapes, marquee ribbon, card shine, row slide-ins. Switched off for `prefers-reduced-motion`. |
 | `public/js/effects.js` | Loader, scroll reveal, 3D card tilt, button ripple, optional sounds, typing subtitle, toasts. The normal mouse cursor is never hidden or replaced. |
 | `public/js/animations.js` | Background shapes, scroll progress bar, card spotlight, click sparkle burst. |
+| `public/js/manager.js` | Assigned-hall dashboard, scoped booking management, and report export. |
+| `public/js/owner.js` | Owner dashboard, account and hall management, assignments, and reports. |
+| `public/js/theme-init.js` | Restores theme before the page is painted. |
 | `public/js/calendar.js` | Dependency-free calendar date picker used on the booking page. |
 | `public/images/hero-hall.svg` | Illustration used in the hero. Hall cards use their own database image, or a generated illustration if it is missing. |
 
@@ -270,8 +320,8 @@ All colours are CSS variables at the top of `public/css/theme.css`.
   `GET /api/halls/:id/availability`.
 - Dashboard statistic cards are counted from `GET /api/halls` and
   `GET /api/admin/bookings`.
-- Facilities are shown only if a hall record has a `facilities` value. The
-  current schema has no such column, so none appear.
+- Hall facilities are stored in the additive schema migration and shown when
+  configured for a hall.
 
 ### "Already booked" feedback
 Clicking a taken slot (shown with a lock) shakes it and shows a toast. If two

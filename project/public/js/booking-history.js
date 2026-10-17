@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   renderNavbar();
-  requireLogin();
+  if (!requireLogin()) return;
   await loadMyBookings();
 });
 

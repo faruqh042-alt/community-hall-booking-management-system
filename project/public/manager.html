@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Manager Console - Community Hall Booking</title>
+<script src="js/theme-init.js"></script>
+<link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="dash-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="pageLoader" role="status" aria-label="Loading"><div class="loader-ring"></div><div class="loader-text">Loading</div></div>
+  <div id="navbar" class="navbar"></div>
+  <main class="container manager-main" id="main">
+    <div id="managerAlert" role="status" aria-live="polite"></div>
+    <section class="dashboard-heading"><div><span class="eyebrow">Assigned venues</span><h1>Manager dashboard</h1><p class="lead">Your halls, their availability, and the bookings that need attention.</p></div></section>
+    <div class="owner-stat-grid manager-stat-grid">
+      <article class="owner-stat"><span>Assigned halls</span><strong id="managerHallsCount">—</strong></article>
+      <article class="owner-stat"><span>Bookings</span><strong id="managerBookingsCount">—</strong></article>
+      <article class="owner-stat"><span>Awaiting review</span><strong id="managerPendingCount">—</strong></article>
+      <article class="owner-stat"><span>Approved</span><strong id="managerApprovedCount">—</strong></article>
+      <article class="owner-stat"><span>Cancelled</span><strong id="managerCancelledCount">—</strong></article>
+    </div>
+    <div class="manager-grid">
+      <section class="premium-panel"><div class="panel-title"><h2>Upcoming events</h2><span>Assigned halls only</span></div><div id="managerUpcoming"></div></section>
+      <section class="premium-panel"><div class="panel-title"><h2>Recent activity</h2><span>Booking updates</span></div><div id="managerActivity"></div></section>
+      <section class="premium-panel"><div class="panel-title"><div><h2>Booking calendar</h2><span id="managerCalendarTitle" class="text-muted"></span></div>
+        <div class="calendar-nav"><button type="button" id="managerCalendarPrev" aria-label="Previous month">‹</button><button type="button" id="managerCalendarNext" aria-label="Next month">›</button></div></div>
+        <div id="managerCalendar" aria-live="polite"></div></section>
+    </div>
+    <section class="premium-panel manager-halls-panel"><div class="panel-title"><div><h2>My halls</h2><p class="text-muted">Only venues assigned by the owner are shown.</p></div></div><div id="managerHalls" class="manager-hall-grid"></div></section>
+    <section class="premium-panel"><div class="panel-title"><div><h2>Booking requests</h2><p class="text-muted">Customer contact details are limited to assigned-hall reservations.</p></div></div>
+      <div class="toolbar"><label>Search bookings<input id="managerBookingSearch" type="search" placeholder="Guest, email, or hall"></label><label>Status<select id="managerBookingStatus"><option value="">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option></select></label><button id="exportManagerBookings" class="btn btn-outline" type="button">Download report</button></div>
+      <div id="managerBookingsTable" class="table-wrap"></div><div id="managerBookingsPager" class="pager"></div>
+    </section>
+    <section id="managerHallEdit" class="premium-panel hidden"><div class="panel-title"><h2 id="managerHallEditTitle">Edit hall</h2><button type="button" class="icon-btn" id="closeManagerHallEdit" aria-label="Close">×</button></div>
+      <form id="managerHallForm" class="owner-form">
+        <input id="managerHallId" type="hidden">
+        <label>Hall name<input id="managerHallName" required maxlength="150"></label>
+        <label>Location<input id="managerHallLocation" required maxlength="200"></label>
+        <label>Price per booking (₹)<input id="managerHallPrice" type="number" min="0" step="0.01"></label>
+        <label>Guest capacity<input id="managerHallCapacity" type="number" min="1" required></label>
+        <label>Photograph URL<input id="managerHallImage" maxlength="255"></label>
+        <label>Facilities<input id="managerHallFacilities"></label>
+        <label class="wide-field">Description<textarea id="managerHallDescription" rows="3"></textarea></label>
+        <div class="wide-field"><div id="managerHallAlert"></div><button class="btn" type="submit">Save hall updates</button></div>
+      </form>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="footer-bottom">Manager console · Access is restricted to halls assigned to your account.</div></footer>
+  <script src="js/auth.js"></script><script src="js/effects.js"></script><script src="js/animations.js"></script><script src="js/manager.js"></script>
+</body>
+</html>

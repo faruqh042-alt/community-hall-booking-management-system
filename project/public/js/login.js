@@ -1,12 +1,21 @@
 // js/login.js - logic for login.html
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   renderNavbar();
 
-  // If already logged in, skip straight to the halls page
   if (isLoggedIn()) {
-    window.location.href = 'halls.html';
-    return;
+    try {
+      const current = await apiRequest('/me');
+      saveSession(getToken(), current.user);
+      window.location.href = getPostLoginDestination(current.user);
+      return;
+    } catch (error) {
+      if (error.status === 401 || error.status === 403) clearSession();
+      else {
+        document.getElementById('loginAlert').innerHTML =
+          `<p class="alert alert-error">${escapeHtml(error.message)} Sign in again after checking your connection.</p>`;
+      }
+    }
   }
 
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
@@ -32,15 +41,24 @@ async function handleLogin(e) {
 
     saveSession(data.token, data.user);
 
-    // Send admins to the dashboard, regular users to the halls list
-    if (data.user.role === 'admin') {
-      window.location.href = 'admin.html';
-    } else {
-      window.location.href = 'halls.html';
-    }
+    window.location.href = getPostLoginDestination(data.user);
   } catch (err) {
     alertBox.innerHTML = `<p class="alert alert-error">${escapeHtml(err.message)}</p>`;
     btn.disabled = false;
     btn.textContent = 'Login';
   }
+}
+
+function getPostLoginDestination(user) {
+  if (user && user.role === 'owner' && user.email.toLowerCase() === 'faruqh042@gmail.com') return 'owner.html';
+  if (user && user.role === 'manager') return 'manager.html';
+  if (user && user.role === 'admin') return 'admin.html';
+
+  const requested = new URLSearchParams(window.location.search).get('redirect');
+  const bookingMatch = requested && requested.match(/^booking\.html\?id=([1-9]\d*)$/);
+  if (bookingMatch && Number.isSafeInteger(Number(bookingMatch[1]))) {
+    return `booking.html?id=${encodeURIComponent(bookingMatch[1])}`;
+  }
+
+  return 'halls.html';
 }

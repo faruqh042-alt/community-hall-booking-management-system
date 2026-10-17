@@ -4,6 +4,14 @@
 
 const { pool } = require('../db');
 const { sendBookingNotification } = require('../utils/mailer');
+const { recordAudit } = require('../utils/audit');
+
+const TIME_SLOTS = [
+  '9:00 AM - 12:00 PM',
+  '12:00 PM - 3:00 PM',
+  '3:00 PM - 6:00 PM',
+  '6:00 PM - 9:00 PM'
+];
 
 // ---------------------------------------------------------
 // POST /api/book  (logged-in users only)
@@ -14,43 +22,63 @@ async function createBooking(req, res) {
     const userId = req.user.id; // set by verifyToken middleware
     const { hall_id, date, time_slot } = req.body;
 
-    if (!hall_id || !date || !time_slot) {
+    if (!Number.isSafeInteger(Number(hall_id)) || Number(hall_id) < 1 ||
+        typeof date !== 'string' || !isValidDate(date) ||
+        !TIME_SLOTS.includes(time_slot)) {
       return res.status(400).json({ message: 'hall_id, date and time_slot are required.' });
     }
 
-    // Don't allow bookings in the past
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().slice(0, 10);
     if (date < today) {
       return res.status(400).json({ message: 'You cannot book a date in the past.' });
     }
 
-    // Make sure the hall actually exists (also grab name/price for the
-    // notification email below, so we don't need a second query later)
-    const [hallRows] = await pool.query('SELECT id, name, price FROM halls WHERE id = ?', [hall_id]);
-    if (hallRows.length === 0) {
-      return res.status(404).json({ message: 'Hall not found.' });
+    const connection = await pool.getConnection();
+    let hall;
+    let bookingId;
+    try {
+      await connection.beginTransaction();
+      const [hallRows] = await connection.query(
+        'SELECT id, name, price FROM halls WHERE id = ? AND is_active = 1 FOR UPDATE',
+        [hall_id]
+      );
+      if (hallRows.length === 0) {
+        await connection.rollback();
+        return res.status(404).json({ message: 'Hall not found or no longer available.' });
+      }
+      hall = hallRows[0];
+
+      const [clashRows] = await connection.query(
+        `SELECT id FROM bookings
+         WHERE hall_id = ? AND date = ? AND time_slot = ? AND status IN ('pending', 'approved')
+         LIMIT 1`,
+        [hall_id, date, time_slot]
+      );
+      if (clashRows.length > 0) {
+        await connection.rollback();
+        return res.status(409).json({ message: 'This slot is already booked. Please choose another time.' });
+      }
+
+      const [result] = await connection.query(
+        `INSERT INTO bookings (user_id, hall_id, date, time_slot, status)
+         VALUES (?, ?, ?, ?, 'pending')`,
+        [userId, hall_id, date, time_slot]
+      );
+      bookingId = result.insertId;
+      await recordAudit(connection, {
+        actorId: userId,
+        action: 'booking.requested',
+        entityType: 'booking',
+        entityId: bookingId,
+        details: { hallId: Number(hall_id), date, timeSlot: time_slot }
+      });
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
+    } finally {
+      connection.release();
     }
-    const hall = hallRows[0];
-
-    // ---- PREVENT DOUBLE BOOKING ----
-    // A slot is considered taken if there's already a pending OR approved
-    // booking for the same hall, date and time_slot. Rejected bookings
-    // do not block the slot.
-    const [clashRows] = await pool.query(
-      `SELECT id FROM bookings
-       WHERE hall_id = ? AND date = ? AND time_slot = ? AND status IN ('pending', 'approved')`,
-      [hall_id, date, time_slot]
-    );
-
-    if (clashRows.length > 0) {
-      return res.status(409).json({ message: 'This slot is already booked. Please choose another time.' });
-    }
-
-    const [result] = await pool.query(
-      `INSERT INTO bookings (user_id, hall_id, date, time_slot, status)
-       VALUES (?, ?, ?, ?, 'pending')`,
-      [userId, hall_id, date, time_slot]
-    );
 
     // Email the owner about this new booking. This is "fire and forget" —
     // sendBookingNotification() catches its own errors internally, so a
@@ -68,7 +96,7 @@ async function createBooking(req, res) {
 
     return res.status(201).json({
       message: 'Booking request submitted! Waiting for admin approval.',
-      bookingId: result.insertId
+      bookingId
     });
   } catch (err) {
     console.error('createBooking error:', err);
@@ -128,26 +156,77 @@ async function updateBookingStatus(req, res) {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!['approved', 'rejected', 'pending'].includes(status)) {
-      return res.status(400).json({ message: "status must be 'approved', 'rejected' or 'pending'." });
+    if (!Number.isSafeInteger(Number(id)) || Number(id) < 1 ||
+        !['approved', 'rejected', 'cancelled'].includes(status)) {
+      return res.status(400).json({ message: "status must be 'approved', 'rejected' or 'cancelled'." });
     }
 
-    const [existing] = await pool.query('SELECT id FROM bookings WHERE id = ?', [id]);
-    if (existing.length === 0) {
-      return res.status(404).json({ message: 'Booking not found.' });
-    }
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      const [existing] = await connection.query(
+        `SELECT b.id, b.hall_id, b.date, b.time_slot, b.status
+         FROM bookings b WHERE b.id = ? FOR UPDATE`,
+        [id]
+      );
+      const booking = existing[0];
+      if (!booking) {
+        await connection.rollback();
+        return res.status(404).json({ message: 'Booking not found.' });
+      }
+      if (booking.status !== 'pending' &&
+          !(booking.status === 'approved' && status === 'cancelled')) {
+        await connection.rollback();
+        return res.status(409).json({ message: 'This booking can no longer be changed.' });
+      }
 
-    await pool.query('UPDATE bookings SET status = ? WHERE id = ?', [status, id]);
-    return res.json({ message: `Booking ${status} successfully.` });
+      await connection.query('SELECT id FROM halls WHERE id = ? FOR UPDATE', [booking.hall_id]);
+      if (status === 'approved') {
+        const [clashes] = await connection.query(
+          `SELECT id FROM bookings
+           WHERE hall_id = ? AND date = ? AND time_slot = ? AND status = 'approved' AND id <> ?
+           LIMIT 1`,
+          [booking.hall_id, booking.date, booking.time_slot, id]
+        );
+        if (clashes.length > 0) {
+          await connection.rollback();
+          return res.status(409).json({ message: 'Another booking already owns this time slot.' });
+        }
+      }
+
+      await connection.query('UPDATE bookings SET status = ? WHERE id = ?', [status, id]);
+      await recordAudit(connection, {
+        actorId: req.user.id,
+        action: `booking.${status}`,
+        entityType: 'booking',
+        entityId: Number(id),
+        details: { previousStatus: booking.status }
+      });
+      await connection.commit();
+      return res.json({ message: `Booking ${status} successfully.` });
+    } catch (err) {
+      await connection.rollback();
+      throw err;
+    } finally {
+      connection.release();
+    }
   } catch (err) {
     console.error('updateBookingStatus error:', err);
     return res.status(500).json({ message: 'Could not update booking status.' });
   }
 }
 
+function isValidDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
 module.exports = {
   createBooking,
   getMyBookings,
   getAllBookings,
-  updateBookingStatus
+  updateBookingStatus,
+  TIME_SLOTS,
+  isValidDate
 };

@@ -14,13 +14,17 @@ let datePicker = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   renderNavbar();
-  requireLogin(); // booking requires being logged in
 
   // The hall id comes from the URL (?id=...) and is sent unchanged to the API
   const hallId = new URLSearchParams(window.location.search).get('id');
-  if (!hallId) {
+  if (!hallId || !/^[1-9]\d*$/.test(hallId) || !Number.isSafeInteger(Number(hallId))) {
     document.getElementById('bookingWrap').innerHTML =
       '<p class="alert alert-error">No hall selected. <a href="halls.html">Browse halls</a></p>';
+    return;
+  }
+
+  if (!isLoggedIn()) {
+    window.location.replace(`login.html?redirect=${encodeURIComponent(`booking.html?id=${hallId}`)}`);
     return;
   }
 
@@ -31,6 +35,9 @@ async function loadHall(id) {
   const wrap = document.getElementById('bookingWrap');
   try {
     currentHall = await apiRequest(`/halls/${id}`);
+    if (!currentHall || Number(currentHall.id) !== Number(id)) {
+      throw new Error('The selected hall could not be found.');
+    }
     renderBookingForm();
   } catch (err) {
     wrap.innerHTML = `<p class="alert alert-error">Could not load hall: ${escapeHtml(err.message)}</p>`;
@@ -191,9 +198,30 @@ async function submitBooking() {
       body: JSON.stringify({ hall_id: currentHall.id, date: selectedDate, time_slot: selectedSlot })
     });
 
-    alertBox.innerHTML = `<p class="alert alert-success">
-      ✨ Booking request submitted! It is now pending owner approval.
-      <a href="booking-history.html">View my bookings &rarr;</a></p>`;
+    const hallImage = currentHall.image ? escapeHtml(currentHall.image) : hallPlaceholder(Number(currentHall.id));
+    const bookingDate = new Date(`${selectedDate}T00:00:00`)
+      .toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    alertBox.innerHTML = `
+      <section class="booking-confirmation" aria-labelledby="bookingConfirmationTitle">
+        <div class="booking-confirmation-heading">
+          <span class="booking-confirmation-check" aria-hidden="true">✓</span>
+          <div>
+            <h3 id="bookingConfirmationTitle">Request sent successfully</h3>
+            <p>Your booking is pending owner approval.</p>
+          </div>
+        </div>
+        <div class="booking-confirmation-details">
+          <img src="${hallImage}" alt="${escapeHtml(currentHall.name)}"
+               onerror="this.onerror=null;this.src=hallPlaceholder(${Number(currentHall.id)});">
+          <div>
+            <strong>${escapeHtml(currentHall.name)}</strong>
+            <span>${escapeHtml(currentHall.location)}</span>
+            <span>${escapeHtml(bookingDate)} · ${escapeHtml(selectedSlot)}</span>
+            <span>Up to ${Number(currentHall.capacity)} guests · ₹${Number(currentHall.price).toLocaleString('en-IN')}</span>
+          </div>
+        </div>
+        <a href="booking-history.html" class="btn btn-sm">View my bookings &rarr;</a>
+      </section>`;
     showToast('Booking request sent successfully!', 'success');
 
     // Refresh availability so the slot that was just booked shows as taken

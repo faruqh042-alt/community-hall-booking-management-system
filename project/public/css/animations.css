@@ -180,5 +180,32 @@ tbody tr:nth-child(n+6) { animation-delay: 0.25s; }
 @media (prefers-reduced-motion: reduce) {
   .bg-shapes, .hero-bg .shape, .marquee-track { animation: none !important; }
   .bg-shapes .blob, .hero-bg .blob, .shape, .card, .float-card, .feature-icon { animation: none !important; }
+  .hero-frame, .hero-frame img {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    clip-path: none !important;
+  }
+  .reveal, .reveal.in-view {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
   #scrollProgress { display: none; }
+}
+
+/* Keep the ambient motion in the site's warm cream-and-gold palette. */
+.bg-shapes .blob:nth-child(1) { background: #FFE9AB; }
+.bg-shapes .blob:nth-child(2) { background: #F5DEBE; }
+.bg-shapes .blob:nth-child(3) { background: #FFF1C7; }
+.hero-bg .b1 { background: rgba(255, 211, 91, 0.36); }
+.hero-bg .b2 { background: rgba(217, 158, 52, 0.2); }
+.hero-bg .b3 { background: rgba(255, 240, 198, 0.58); }
+.hero-bg .h1 { background: var(--coral); }
+.hero-bg .h2 { border-color: rgba(184, 120, 36, 0.5); }
+.hero-bg .h3 { background: var(--violet); }
+.hero-bg .h4 { color: var(--sky); }
+.card::before {
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(211, 154, 8, 0.13), transparent 70%);
 }

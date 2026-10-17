@@ -14,12 +14,18 @@ const authRoutes = require('./routes/authRoutes');
 const hallRoutes = require('./routes/hallRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const ownerRoutes = require('./routes/ownerRoutes');
+const managerRoutes = require('./routes/managerRoutes');
 
 const app = express();
 
 // ---------------- MIDDLEWARE ----------------
-app.use(cors());              // allow the frontend (different port) to call this API
+app.use(cors({ origin: process.env.APP_ORIGIN || false }));
 app.use(express.json());      // parse incoming JSON request bodies
+app.use((req, res, next) => {
+  req.body = req.body || {};
+  next();
+});
 
 // Serve the frontend static files (HTML/CSS/JS) from the /public folder.
 // This means you can open http://localhost:5000/ and see index.html directly,
@@ -31,6 +37,8 @@ app.use('/api', authRoutes);           // /api/register, /api/login
 app.use('/api/halls', hallRoutes);     // /api/halls, /api/halls/:id, /api/halls/:id/availability
 app.use('/api', bookingRoutes);        // /api/book, /api/bookings
 app.use('/api/admin', adminRoutes);    // /api/admin/halls, /api/admin/bookings
+app.use('/api/owner', ownerRoutes);
+app.use('/api/manager', managerRoutes);
 
 // Simple health-check route
 app.get('/api/health', (req, res) => {

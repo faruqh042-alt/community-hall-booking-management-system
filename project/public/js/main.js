@@ -13,6 +13,9 @@ async function loadFeaturedHalls() {
   const container = document.getElementById('featuredHalls');
   try {
     const halls = await apiRequest('/halls');
+    const totalCapacity = halls.reduce((total, hall) => total + Number(hall.capacity), 0);
+    animateCount(document.getElementById('homeHallCount'), halls.length);
+    animateCount(document.getElementById('homeGuestCapacity'), totalCapacity);
     const featured = halls.slice(0, 3); // first 3 halls from the database
 
     if (featured.length === 0) {
@@ -58,6 +61,7 @@ function hallCardHtml(hall) {
       <div class="card-body">
         <h3>${escapeHtml(hall.name)}</h3>
         <p class="card-meta">📍 ${escapeHtml(hall.location)}</p>
+        <p class="hall-card-description">${escapeHtml(hall.description || 'No description provided for this hall.')}</p>
         <div class="chips">
           <span class="chip">👥 Up to ${Number(hall.capacity)} guests</span>
           ${facilities}

@@ -22,9 +22,13 @@ function getUser() {
   return raw ? JSON.parse(raw) : null;
 }
 
-function logout() {
+function clearSession() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+}
+
+function logout() {
+  clearSession();
   window.location.href = 'login.html';
 }
 
@@ -55,9 +59,12 @@ async function apiRequest(path, options = {}) {
     data = {};
   }
 
+  if (response.status === 401 && token) clearSession();
   if (!response.ok) {
     // Throw so calling code can catch() and show data.message
-    throw new Error(data.message || 'Something went wrong.');
+    const error = new Error(data.message || 'Something went wrong.');
+    error.status = response.status;
+    throw error;
   }
 
   return data;
@@ -76,12 +83,18 @@ function renderNavbar() {
   // Which link is "active"? booking + hall details belong under Browse Halls.
   let page = window.location.pathname.split('/').pop() || 'index.html';
   if (page === 'booking.html' || page === 'hall-details.html') page = 'halls.html';
+  if (page === 'owner.html') page = 'owner.html';
+  if (page === 'manager.html') page = 'manager.html';
   const linkClass = (file) => (file === page ? ' class="active" aria-current="page"' : '');
 
   let rightLinks = '';
   if (user) {
     rightLinks += `<li><span class="nav-user">Hi, ${escapeHtml(user.name)}</span></li>`;
-    if (user.role === 'admin') {
+    if (user.role === 'owner') {
+      rightLinks += `<li><a href="owner.html"${linkClass('owner.html')}>Owner dashboard</a></li>`;
+    } else if (user.role === 'manager') {
+      rightLinks += `<li><a href="manager.html"${linkClass('manager.html')}>Manager dashboard</a></li>`;
+    } else if (user.role === 'admin') {
       rightLinks += `<li><a href="admin.html"${linkClass('admin.html')}>Admin Dashboard</a></li>`;
     } else {
       rightLinks += `<li><a href="booking-history.html"${linkClass('booking-history.html')}>My Bookings</a></li>`;
@@ -115,6 +128,7 @@ function renderNavbar() {
     </div>
   `;
 
+  initThemeToggle(navbarEl.querySelector('nav ul'));
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
@@ -133,12 +147,51 @@ function renderNavbar() {
   if (typeof initSoundToggle === 'function') initSoundToggle();
 }
 
+function applyTheme(theme, persist = true) {
+  const next = theme === 'dark' ? 'dark' : 'light';
+  const changed = document.documentElement.dataset.theme !== next;
+  if (persist && changed) document.documentElement.classList.add('theme-transition');
+  document.documentElement.dataset.theme = next;
+  if (persist && changed) {
+    window.clearTimeout(applyTheme.transitionTimer);
+    applyTheme.transitionTimer = window.setTimeout(() => {
+      document.documentElement.classList.remove('theme-transition');
+    }, 240);
+  }
+  if (persist) {
+    try { localStorage.setItem('siteTheme', next); } catch (err) { /* storage can be disabled */ }
+  }
+  const toggle = document.getElementById('themeToggle');
+  if (toggle) {
+    toggle.setAttribute('aria-pressed', String(next === 'dark'));
+    toggle.setAttribute('aria-label', `Switch to ${next === 'dark' ? 'light' : 'dark'} mode`);
+    toggle.title = `Switch to ${next === 'dark' ? 'light' : 'dark'} mode`;
+    toggle.innerHTML = next === 'dark'
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.6A8.5 8.5 0 0 1 8.4 3.8 8.6 8.6 0 1 0 20.2 15.6Z"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>';
+  }
+}
+
+function initThemeToggle(list) {
+  if (!list || document.getElementById('themeToggle')) return;
+  const item = document.createElement('li');
+  item.innerHTML = '<button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false"></button>';
+  list.appendChild(item);
+  applyTheme(document.documentElement.dataset.theme, false);
+  item.querySelector('button').addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme;
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+}
+
 // Redirects to login.html if the visitor is not logged in.
 // Call this at the top of pages that require login (booking, booking-history).
 function requireLogin() {
   if (!isLoggedIn()) {
     window.location.href = 'login.html';
+    return false;
   }
+  return true;
 }
 
 // Redirects away if the visitor is not an admin.
@@ -146,7 +199,9 @@ function requireAdmin() {
   const user = getUser();
   if (!isLoggedIn() || !user || user.role !== 'admin') {
     window.location.href = 'login.html';
+    return false;
   }
+  return true;
 }
 
 // Small helper to avoid basic HTML injection when showing user-provided text.

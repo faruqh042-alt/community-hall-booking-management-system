@@ -8,7 +8,7 @@ let adminBookings = [];   // last list of bookings from GET /api/admin/bookings
 
 document.addEventListener('DOMContentLoaded', async () => {
   renderNavbar();
-  requireAdmin(); // kicks non-admins back to login.html
+  if (!requireAdmin()) return; // kicks non-admins back to login.html
 
   setupTabs();
   setupHallForm();

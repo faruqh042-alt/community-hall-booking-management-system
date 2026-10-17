@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Owner Console - Community Hall Booking</title>
+<script src="js/theme-init.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="dash-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="pageLoader" role="status" aria-label="Loading"><div class="loader-ring"></div><div class="loader-text">Loading</div></div>
+  <div id="navbar" class="navbar"></div>
+  <main class="container owner-layout" id="main">
+    <aside class="dash-sidebar" aria-label="Owner dashboard sections">
+      <div class="dash-side-title">Owner console</div>
+      <button class="tab-btn side-link active" data-tab="ownerOverview" type="button">Overview</button>
+      <button class="tab-btn side-link" data-tab="ownerUsers" type="button">Users &amp; managers</button>
+      <button class="tab-btn side-link" data-tab="ownerHalls" type="button">Community halls</button>
+      <button class="tab-btn side-link" data-tab="ownerBookings" type="button">All bookings</button>
+    </aside>
+    <div class="dash-main owner-main">
+      <div id="ownerAlert" role="status" aria-live="polite"></div>
+      <section id="ownerOverview" class="tab-content active">
+        <div class="dashboard-heading"><div><span class="eyebrow">Verified owner access</span><h1>Owner dashboard</h1><p class="lead">A live view of your halls, members, and reservations.</p></div></div>
+        <div class="owner-stat-grid">
+          <article class="owner-stat"><span>Members</span><strong id="ownerUsersCount">—</strong></article>
+          <article class="owner-stat"><span>Managers</span><strong id="ownerManagersCount">—</strong></article>
+          <article class="owner-stat"><span>Active halls</span><strong id="ownerHallsCount">—</strong></article>
+          <article class="owner-stat"><span>All bookings</span><strong id="ownerBookingsCount">—</strong></article>
+          <article class="owner-stat"><span>Awaiting review</span><strong id="ownerPendingCount">—</strong></article>
+          <article class="owner-stat"><span>Approved</span><strong id="ownerApprovedCount">—</strong></article>
+          <article class="owner-stat"><span>Rejected / cancelled</span><strong id="ownerClosedCount">—</strong></article>
+          <article class="owner-stat"><span>Revenue</span><strong id="ownerRevenue">Not recorded</strong><small id="ownerRevenueNote">No payment records exist.</small></article>
+        </div>
+        <div class="owner-overview-grid">
+          <section class="premium-panel"><div class="panel-title"><h2>Bookings by month</h2><span>Recorded booking dates</span></div><div id="ownerChart" class="owner-chart" aria-label="Monthly booking chart"></div></section>
+          <section class="premium-panel"><div class="panel-title"><h2>Hall performance</h2><span>From booking history</span></div><div id="ownerHallPerformance"></div></section>
+          <section class="premium-panel"><div class="panel-title"><h2>Recent bookings</h2><button class="text-action" type="button" data-open-tab="ownerBookings">View all</button></div><div id="ownerRecentBookings"></div></section>
+          <section class="premium-panel"><div class="panel-title"><h2>Recent registrations</h2><button class="text-action" type="button" data-open-tab="ownerUsers">Manage accounts</button></div><div id="ownerRecentUsers"></div></section>
+          <section class="premium-panel"><div class="panel-title"><h2>Recent management activity</h2><span>Recorded owner and manager actions</span></div><div id="ownerRecentActivity"></div></section>
+        </div>
+      </section>
+
+      <section id="ownerUsers" class="tab-content">
+        <div class="dashboard-heading"><div><h1>Users &amp; managers</h1><p class="lead">Promote accounts to manager and assign only the halls they manage.</p></div></div>
+        <section class="premium-panel">
+          <div class="toolbar">
+            <label>Search accounts <input id="ownerUserSearch" type="search" placeholder="Name or email"></label>
+            <label>Role <select id="ownerUserRole"><option value="">All accounts</option><option value="user">Users</option><option value="manager">Managers</option></select></label>
+            <label>Status <select id="ownerUserActive"><option value="">All</option><option value="true">Active</option><option value="false">Inactive</option></select></label>
+          </div>
+          <div id="ownerUsersTable" class="table-wrap"><p class="text-muted">Loading accounts…</p></div>
+          <div id="ownerUsersPager" class="pager"></div>
+        </section>
+        <section id="managerAssignments" class="premium-panel hidden" aria-labelledby="assignmentTitle">
+          <div class="panel-title"><h2 id="assignmentTitle">Assign manager's halls</h2><button type="button" class="icon-btn" id="closeAssignments" aria-label="Close">×</button></div>
+          <p class="text-muted">Managers can only access halls checked here. Pricing changes are optional per hall.</p>
+          <div id="assignmentChoices" class="assignment-grid"></div>
+          <button type="button" class="btn mt-16" id="saveAssignments">Save assignments</button>
+        </section>
+      </section>
+
+      <section id="ownerHalls" class="tab-content">
+        <div class="dashboard-heading"><div><h1>Community halls</h1><p class="lead">Manage venues while preserving their booking history.</p></div><button class="btn" id="newHallButton" type="button">Add a hall</button></div>
+        <section id="ownerHallFormPanel" class="premium-panel hidden">
+          <div class="panel-title"><h2 id="ownerHallFormTitle">Add a hall</h2><button type="button" class="icon-btn" id="cancelHallEdit" aria-label="Close">×</button></div>
+          <form id="ownerHallForm" class="owner-form">
+            <input type="hidden" id="ownerHallId">
+            <label>Hall name<input id="ownerHallName" required maxlength="150"></label>
+            <label>Location<input id="ownerHallLocation" required maxlength="200"></label>
+            <label>Price per booking (₹)<input id="ownerHallPrice" type="number" required min="0" step="0.01"></label>
+            <label>Guest capacity<input id="ownerHallCapacity" type="number" required min="1" step="1"></label>
+            <label>Photograph URL<input id="ownerHallImage" maxlength="255"></label>
+            <label>Facilities<input id="ownerHallFacilities" placeholder="Parking, catering, stage"></label>
+            <label class="wide-field">Description<textarea id="ownerHallDescription" rows="3"></textarea></label>
+            <div class="wide-field"><div id="ownerHallFormAlert"></div><button class="btn" type="submit">Save hall</button></div>
+          </form>
+        </section>
+        <section class="premium-panel"><div class="toolbar"><label>Search halls<input id="ownerHallSearch" type="search" placeholder="Name or location"></label><label>Status<select id="ownerHallActive"><option value="">All halls</option><option value="true">Active</option><option value="false">Inactive</option></select></label></div><div id="ownerHallsTable" class="table-wrap"></div></section>
+      </section>
+
+      <section id="ownerBookings" class="tab-content">
+        <div class="dashboard-heading"><div><h1>All bookings</h1><p class="lead">Review booking activity across every community hall.</p></div><button class="btn btn-outline" id="downloadBookings" type="button">Download CSV</button></div>
+        <section class="premium-panel">
+          <div class="toolbar"><label>Search bookings<input id="ownerBookingSearch" type="search" placeholder="Guest, email, or hall"></label><label>Status<select id="ownerBookingStatus"><option value="">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option></select></label></div>
+          <div id="ownerBookingsTable" class="table-wrap"></div>
+          <div id="ownerBookingsPager" class="pager"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="footer-bottom">Owner console · Account and booking activity is loaded from the live database.</div></footer>
+  <script src="js/auth.js"></script><script src="js/effects.js"></script><script src="js/animations.js"></script><script src="js/owner.js"></script>
+</body>
+</html>

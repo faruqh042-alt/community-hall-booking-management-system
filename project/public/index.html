@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Community Hall Booking Management System</title>
 <meta name="description" content="Browse community halls, check live availability and book your event in minutes.">
+<script src="js/theme-init.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/animations.css">
@@ -38,18 +39,18 @@
     <div class="container hero-inner">
       <div class="hero-copy">
         <span class="eyebrow">Live availability · Instant requests</span>
-        <h1 class="hero-title">Find &amp; Book the <span class="gradient-text">Perfect Community Hall</span></h1>
-        <p class="hero-subtitle" id="typedSubtitle" data-text="Browse halls, check availability, and book your event in minutes."></p>
+        <h1 class="hero-title">Find Your <span class="gradient-text">Perfect Space</span> for Every Occasion.</h1>
+        <p class="hero-subtitle" id="typedSubtitle" data-text="From intimate celebrations to grand gatherings, discover a space that makes every moment feel special."></p>
         <div class="hero-actions">
-          <a href="halls.html" class="btn btn-lg btn-gradient">Book a Hall</a>
-          <a href="#featured" class="btn btn-lg btn-ghost">Explore Halls</a>
+          <a href="halls.html" class="btn btn-lg btn-gradient">Explore Halls</a>
+          <a href="halls.html" class="btn btn-lg btn-ghost">Book Your Event</a>
         </div>
         <p class="hero-note">📞 Questions? Call the owner: <a href="tel:+919353916328"><strong>+91 93539 16328</strong></a></p>
       </div>
 
       <div class="hero-visual">
         <div class="hero-frame" data-depth="12">
-          <img src="images/hero-hall.svg" alt="Illustration of a bright community hall decorated with bunting and balloons" width="640" height="520">
+          <img src="images/grand-palace.jpg" alt="A beautifully prepared event venue ready to welcome guests" width="640" height="520" onerror="this.onerror=null;this.src='images/hero-hall.svg';">
         </div>
         <div class="float-card fc-1" data-depth="26"><span class="ico">✅</span> Instant booking requests</div>
         <div class="float-card fc-2" data-depth="20"><span class="ico">📅</span> Live availability</div>
@@ -60,6 +61,19 @@
 
   <!-- Scrolling ribbon (the track is duplicated so the loop is seamless) -->
   <div class="marquee" aria-hidden="true"><div class="marquee-track"><span>✦ Live Availability</span><span>✦ Instant Booking</span><span>✦ Owner Approval</span><span>✦ Email Alerts</span><span>✦ Calendar Picker</span><span>✦ Secure Login</span><span>✦ Premium Halls</span><span>✦ Easy Management</span><span>✦ Live Availability</span><span>✦ Instant Booking</span><span>✦ Owner Approval</span><span>✦ Email Alerts</span><span>✦ Calendar Picker</span><span>✦ Secure Login</span><span>✦ Premium Halls</span><span>✦ Easy Management</span></div></div>
+
+  <section class="home-stats" aria-label="Hall collection statistics">
+    <div class="container home-stat-grid">
+      <article class="home-stat reveal">
+        <span class="home-stat-icon" aria-hidden="true">🏛️</span>
+        <div><strong id="homeHallCount">—</strong><span>Halls to explore</span></div>
+      </article>
+      <article class="home-stat reveal">
+        <span class="home-stat-icon" aria-hidden="true">👥</span>
+        <div><strong id="homeGuestCapacity">—</strong><span>Guest capacity across our halls</span></div>
+      </article>
+    </div>
+  </section>
 
   <!-- ============ HOW IT WORKS ============ -->
   <section class="section section-alt">
