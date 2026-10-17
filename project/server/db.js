@@ -6,14 +6,21 @@
 const mysql = require('mysql2/promise'); // promise-based version so we can use async/await
 require('dotenv').config();
 
+const remoteDatabase = Boolean(process.env.DB_HOST);
+
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'community_hall_db',
-  port: process.env.DB_PORT || 3306,
+  port: Number(process.env.DB_PORT || 3306),
+
+  ssl: remoteDatabase
+    ? { minVersion: 'TLSv1.2', rejectUnauthorized: true }
+    : undefined,
+
   waitForConnections: true,
-  connectionLimit: 10, // max simultaneous connections
+  connectionLimit: 10,
   queueLimit: 0
 });
 
@@ -24,7 +31,8 @@ async function testConnection() {
     console.log('✅ MySQL database connected successfully');
     conn.release();
   } catch (err) {
-    console.error('❌ Could not connect to MySQL database:', err.message);
+    const details = err.code ? `${err.code}: ${err.message}` : err.message;
+    console.error('❌ Could not connect to MySQL database:', details);
   }
 }
 
